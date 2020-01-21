@@ -155,7 +155,6 @@ export const isValidAccessToken = async (req: Request, res: Response, next: Next
         if (provider == "truelayer") {
             const newToken: any = await trueLayerClient.refreshAccessToken(token.refreshToken).catch((err: Error) => {
                 // RefreshToken is not valid
-                logger.error(err);
                 res.redirect("/auth/truelayer");
             });
 

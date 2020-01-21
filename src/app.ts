@@ -113,6 +113,7 @@ app.get("/api/transactions/:id", passportConfig.isAuthenticated, apiController.g
 
 app.get("/api/user/:id/transactions", passportConfig.isAuthenticated, apiController.getTransactionsByUserId);
 app.get("/api/user/:id/accounts", passportConfig.isAuthenticated, apiController.getAccountsByUserId);
+app.get("/api/user/:id/transactions/groupByAccount", passportConfig.isAuthenticated, apiController.getTransactionsGroupByAccount);
 
 /**
  * External Service Request

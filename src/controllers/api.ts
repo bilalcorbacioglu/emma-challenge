@@ -54,7 +54,7 @@ export const getTrueLayerData = async (req: Request, res: Response, next: NextFu
     });
 
     const accounts: any = await DataAPIClient.getAccounts(user.tokens.find((token) => token.kind === "truelayer").access_token).catch((err: Error) => {
-        logger.debug(err);
+        logger.error(err);
         res.redirect("/");
     });
     Account.bulkWrite(
@@ -160,4 +160,26 @@ export const getTransactionsByUserId = (req: Request, res: Response, next: NextF
             }
             res.json(transactions);
         });
+};
+
+export const getTransactionsGroupByAccount = (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id;
+    
+    Transaction.aggregate([
+        {
+            $match: { 
+                "user_id": {"$regex": userId}
+            }
+        },
+        {
+            $group: {
+                _id: "$account_id",
+                obj: { $push: "$$ROOT" }
+            }
+        }
+    ]).exec((err, result)=>{
+        if(err) return next(err);
+        res.json(result);
+    });
+
 };
