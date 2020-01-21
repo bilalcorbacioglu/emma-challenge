@@ -47,13 +47,13 @@ export const getTrueLayerData = async (req: Request, res: Response, next: NextFu
     const userFromFlow = req.user as UserDocument;
 
     const user = await User.findById(userFromFlow.id, async (err, user) => {
-        if(err)
+        if (err)
             next(err);
-        
+
         return user;
     });
 
-    const accounts: any = await DataAPIClient.getAccounts(user.tokens.find((token) => token.kind === "truelayer").access_token).catch((err: Error)=> {
+    const accounts: any = await DataAPIClient.getAccounts(user.tokens.find((token) => token.kind === "truelayer").access_token).catch((err: Error) => {
         logger.debug(err);
         res.redirect("/");
     });
@@ -70,7 +70,7 @@ export const getTrueLayerData = async (req: Request, res: Response, next: NextFu
     );
 
     await Promise.all(accounts.results.map(async (item: { account_id: string }) => {
-        const transactions: any = await DataAPIClient.getTransactions(user.tokens.find((token) => token.kind === "truelayer").access_token, item.account_id).catch((err: Error)=>{
+        const transactions: any = await DataAPIClient.getTransactions(user.tokens.find((token) => token.kind === "truelayer").access_token, item.account_id).catch((err: Error) => {
             logger.error(err);
             res.redirect("/");
         });
@@ -78,7 +78,7 @@ export const getTrueLayerData = async (req: Request, res: Response, next: NextFu
             transactions.results.map(
                 (transaction: TransactionDocument) => ({
                     updateOne: {
-                        filter: { user_id: user.id, transactionId: transaction.transaction_id  },
+                        filter: { user_id: user.id, transactionId: transaction.transaction_id },
                         update: { $set: { ...transaction, account_id: item.account_id, user_id: user.id } },
                         upsert: true
                     }

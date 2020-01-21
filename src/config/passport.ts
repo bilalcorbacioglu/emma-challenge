@@ -144,37 +144,6 @@ export const isAuthorized = (req: Request, res: Response, next: NextFunction) =>
     }
 };
 
-// export const isValidAccessToken: any = async (provider: any, user: UserDocument) => {
-//     const token = _.find(user.tokens, { kind: provider });
-//     if (token && token.access_token_expires > new Date(Date.now())) {
-//         return true;
-//     } else {
-//         if (provider == "truelayer") {
-//             const newToken: any = await trueLayerClient.refreshAccessToken(token.refreshToken).catch((err) => {
-//                 // RefreshToken is not valid
-//                 logger.error(err);
-//                 return false;
-//             });
-
-//             await User.findById(user.id, async (err, existingUser: any) => {
-//                 existingUser.tokens = existingUser.tokens.length > 0 ? existingUser.tokens.filter((token: AuthToken) => !token.kind.includes("truelayer")) : existingUser.tokens;
-//                 existingUser.tokens.push({
-//                     kind: "truelayer",
-//                     access_token: newToken.access_token,
-//                     refreshToken: newToken.refresh_token,
-//                     access_token_expires: new Date(Date.now() + +TRUELAYER_ACCESSTOKEN_EXPIRES_TIME)
-//                 });
-//                 await existingUser.save((err: Error) => {
-//                     return false;
-//                 });
-
-//             });
-//             return true;
-//         }
-//         return false;
-//     }
-// };
-
 export const isValidAccessToken = async (req: Request, res: Response, next: NextFunction) => {
     const provider = req.path.split("/").slice(-1)[0];
     const user = req.user as UserDocument;
