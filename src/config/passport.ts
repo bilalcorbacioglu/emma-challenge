@@ -7,6 +7,7 @@ import { TRUELAYER_CLIENT_ID, TRUELAYER_CLIENT_SECRET, TRUELAYER_REDIRECT_URL, T
 import { User, UserDocument, AuthToken } from "../models/User";
 import { Request, Response, NextFunction } from "express";
 import { AuthAPIClient, DataAPIClient } from "truelayer-client";
+import logger from "../util/logger";
 
 const trueLayerClient = new AuthAPIClient({
     client_id: TRUELAYER_CLIENT_ID,
@@ -52,7 +53,7 @@ passport.use("truelayer", new CustomStrategy(
             const user = req.user as UserDocument;
             User.findById(user.id, (err, user: any) => {
                 if (err) { return done(err); }
-                user.tokens = user.tokens.length > 0 ? user.tokens.map((token: AuthToken) => token.kind !== "truelayer") : user.tokens;
+                user.tokens = user.tokens.length > 0 ? user.tokens.filter((token: AuthToken) => !token.kind.includes("truelayer")) : user.tokens;
                 user.tokens.push({
                     kind: "truelayer",
                     access_token: tokens.access_token,
@@ -60,7 +61,7 @@ passport.use("truelayer", new CustomStrategy(
                     access_token_expires: new Date(Date.now() + +TRUELAYER_ACCESSTOKEN_EXPIRES_TIME)  //+1 Hour
                 });
                 user.save((err: Error) => {
-                    req.flash("info", { msg: "TrueLayer account has been linked." });
+                    req.flash("info", { msg: "TrueLayer account has been linked/updated." });
                     done(err, user);
                 });
             });
@@ -70,7 +71,7 @@ passport.use("truelayer", new CustomStrategy(
             User.findOne({ email: uniqueEmail }, (err, existingEmailUser: any) => {
                 if (err) { return done(err); }
                 if (existingEmailUser) {
-                    existingEmailUser.tokens = existingEmailUser.tokens.length > 0 ? existingEmailUser.tokens.map((token: AuthToken) => token.kind !== "truelayer") : existingEmailUser.tokens;
+                    existingEmailUser.tokens = existingEmailUser.tokens.length > 0 ? existingEmailUser.tokens.filter((token: AuthToken) => !token.kind.includes("truelayer")) : existingEmailUser.tokens;
                     existingEmailUser.tokens.push({
                         kind: "truelayer",
                         access_token: tokens.access_token,
@@ -125,7 +126,7 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
     if (req.isAuthenticated()) {
         return next();
     }
-    res.redirect("login");
+    res.redirect("/login");
 };
 
 /**
@@ -140,5 +141,70 @@ export const isAuthorized = (req: Request, res: Response, next: NextFunction) =>
         next();
     } else {
         res.redirect(`/auth/${provider}`);
+    }
+};
+
+// export const isValidAccessToken: any = async (provider: any, user: UserDocument) => {
+//     const token = _.find(user.tokens, { kind: provider });
+//     if (token && token.access_token_expires > new Date(Date.now())) {
+//         return true;
+//     } else {
+//         if (provider == "truelayer") {
+//             const newToken: any = await trueLayerClient.refreshAccessToken(token.refreshToken).catch((err) => {
+//                 // RefreshToken is not valid
+//                 logger.error(err);
+//                 return false;
+//             });
+
+//             await User.findById(user.id, async (err, existingUser: any) => {
+//                 existingUser.tokens = existingUser.tokens.length > 0 ? existingUser.tokens.filter((token: AuthToken) => !token.kind.includes("truelayer")) : existingUser.tokens;
+//                 existingUser.tokens.push({
+//                     kind: "truelayer",
+//                     access_token: newToken.access_token,
+//                     refreshToken: newToken.refresh_token,
+//                     access_token_expires: new Date(Date.now() + +TRUELAYER_ACCESSTOKEN_EXPIRES_TIME)
+//                 });
+//                 await existingUser.save((err: Error) => {
+//                     return false;
+//                 });
+
+//             });
+//             return true;
+//         }
+//         return false;
+//     }
+// };
+
+export const isValidAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+    const provider = req.path.split("/").slice(-1)[0];
+    const user = req.user as UserDocument;
+
+    const token = _.find(user.tokens, { kind: provider });
+    if (token && token.access_token_expires > new Date(Date.now())) {
+        next();
+    } else {
+        if (provider == "truelayer") {
+            const newToken: any = await trueLayerClient.refreshAccessToken(token.refreshToken).catch((err: Error) => {
+                // RefreshToken is not valid
+                logger.error(err);
+                res.redirect("/auth/truelayer");
+            });
+
+            await User.findById(user.id, async (err, existingUser: any) => {
+                existingUser.tokens = existingUser.tokens.length > 0 ? existingUser.tokens.filter((token: AuthToken) => !token.kind.includes("truelayer")) : existingUser.tokens;
+                existingUser.tokens.push({
+                    kind: "truelayer",
+                    access_token: newToken.access_token,
+                    refreshToken: newToken.refresh_token,
+                    access_token_expires: new Date(Date.now() + +TRUELAYER_ACCESSTOKEN_EXPIRES_TIME)
+                });
+                await existingUser.save((err: Error) => {
+                    logger.error(err);
+                    res.redirect("/");
+                });
+            });
+            next();
+        }
+        res.redirect("/");
     }
 };

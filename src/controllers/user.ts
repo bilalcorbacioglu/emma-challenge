@@ -49,6 +49,7 @@ export const postLogin = async (req: Request, res: Response, next: NextFunction)
             if (err) { return next(err); }
             req.flash("success", { msg: "Success! You are logged in." });
             if(user.tokens.find((token: AuthToken) => token.kind === "truelayer"))
+                //if User have connection from truelayer -> get Data
                 res.redirect("/api/truelayer");
             else
                 res.redirect(req.session.returnTo || "/");

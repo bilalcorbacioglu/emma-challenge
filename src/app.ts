@@ -111,10 +111,14 @@ app.get("/api/accounts/:id", passportConfig.isAuthenticated, apiController.getAc
 app.get("/api/transactions", passportConfig.isAuthenticated, apiController.getTransactions);
 app.get("/api/transactions/:id", passportConfig.isAuthenticated, apiController.getTransaction);
 
-app.get("/api/user/:id/transactions", passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getTransactionsByUserId);
+app.get("/api/user/:id/transactions", passportConfig.isAuthenticated, apiController.getTransactionsByUserId);
 app.get("/api/user/:id/accounts", passportConfig.isAuthenticated, apiController.getAccountsByUserId);
 
-app.get("/api/truelayer", passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getTrueLayerData);
+/**
+ * External Service Request
+ */
+
+app.get("/api/truelayer", passportConfig.isAuthenticated, passportConfig.isAuthorized, passportConfig.isValidAccessToken, apiController.getTrueLayerData);
 
 /**
  * OAuth authentication routes. (Sign in - TrueLayer)

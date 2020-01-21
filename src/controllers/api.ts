@@ -2,10 +2,11 @@
 "use strict";
 
 import { Response, Request, NextFunction } from "express";
-import { UserDocument } from "../models/User";
+import { UserDocument, User } from "../models/User";
 import { Account, AccountDocument } from "../models/Account";
 import { Transaction, TransactionDocument } from "../models/Transaction";
 import { AuthAPIClient, DataAPIClient } from "truelayer-client";
+
 import logger from "../util/logger";
 
 const client = new AuthAPIClient({
@@ -43,28 +44,41 @@ export const getTrueLayerRedirect = (req: Request, res: Response) => {
 };
 
 export const getTrueLayerData = async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user as UserDocument;
-    //TODO BEFORE AccessTokenValidCheck
-    const accounts = await DataAPIClient.getAccounts(user.tokens.find((token) => token.kind === "truelayer").access_token);
+    const userFromFlow = req.user as UserDocument;
+
+    const user = await User.findById(userFromFlow.id, async (err, user) => {
+        if(err)
+            next(err);
+        
+        return user;
+    });
+
+    const accounts: any = await DataAPIClient.getAccounts(user.tokens.find((token) => token.kind === "truelayer").access_token).catch((err: Error)=> {
+        logger.debug(err);
+        res.redirect("/");
+    });
     Account.bulkWrite(
         accounts.results.map(
             (account: AccountDocument) => ({
                 updateOne: {
-                    filter: { accountId: account.account_id, user_id: user.id },
+                    filter: { user_id: user.id, accountId: account.account_id },
                     update: { $set: { ...account, user_id: user.id } },
                     upsert: true
                 }
             })
         )
     );
-    //TODO: Handle Promise
-    await Promise.all(accounts.results.map(async item => {
-        const transactions = await DataAPIClient.getTransactions(user.tokens.find((token) => token.kind === "truelayer").access_token, item.account_id);
+
+    await Promise.all(accounts.results.map(async (item: { account_id: string }) => {
+        const transactions: any = await DataAPIClient.getTransactions(user.tokens.find((token) => token.kind === "truelayer").access_token, item.account_id).catch((err: Error)=>{
+            logger.error(err);
+            res.redirect("/");
+        });
         Transaction.bulkWrite(
             transactions.results.map(
                 (transaction: TransactionDocument) => ({
                     updateOne: {
-                        filter: { transactionId: transaction.transaction_id, user_id: user.id },
+                        filter: { user_id: user.id, transactionId: transaction.transaction_id  },
                         update: { $set: { ...transaction, account_id: item.account_id, user_id: user.id } },
                         upsert: true
                     }
@@ -73,7 +87,6 @@ export const getTrueLayerData = async (req: Request, res: Response, next: NextFu
         );
     })).catch(err => {
         logger.error(err);
-        console.log(err);
     });
 
     res.redirect("/");
