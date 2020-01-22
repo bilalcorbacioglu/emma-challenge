@@ -101,7 +101,7 @@ app.post("/user/delete", passportConfig.isAuthenticated, userController.postDele
 app.get("/user/unlink/:provider", passportConfig.isAuthenticated, userController.getOauthUnlink);
 
 /**
- * API examples routes.
+ * API routes.
  */
 app.get("/api", apiController.getApi);
 
@@ -120,10 +120,12 @@ app.get("/api/user/:id/transactions/groupByAccount", passportConfig.isAuthentica
  */
 
 app.get("/api/truelayer", passportConfig.isAuthenticated, passportConfig.isAuthorized, passportConfig.isValidAccessToken, apiController.getTrueLayerData);
+app.get("/api/truelayer/:userId/test", passportConfig.isAuthenticated, apiController.getTrueLayerServiceTest);
 
 /**
  * OAuth authentication routes. (Sign in - TrueLayer)
  */
+
 app.get("/auth/truelayer", apiController.getTrueLayerRedirect);
 app.get("/auth/truelayer/callback", passport.authenticate("truelayer", { failureRedirect: "/login" }), (req, res) => {
     res.redirect("/api/truelayer");
