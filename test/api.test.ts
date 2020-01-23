@@ -1,13 +1,6 @@
 import request from "supertest";
 import app from "../src/app";
 
-describe("GET /api", () => {
-    it("should return 200 OK", () => {
-        return request(app).get("/api")
-            .expect(200);
-    });
-});
-
 describe("GET /auth/truelayer", () => {
     it("should return 302 Redirection", () => {
         return request(app).get("/auth/truelayer")
