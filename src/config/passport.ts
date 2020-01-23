@@ -47,8 +47,10 @@ passport.deserializeUser((id, done) => {
 passport.use("truelayer", new CustomStrategy(
     async function (req: any, done: any) {
         const code = req.query.code;
-        const tokens = await trueLayerClient.exchangeCodeForToken(TRUELAYER_REDIRECT_URL, code);
-        const info = await DataAPIClient.getInfo(tokens.access_token);
+        const tokens: any = await trueLayerClient.exchangeCodeForToken(TRUELAYER_REDIRECT_URL, code).catch((err)=>{
+            logger.error(err);
+            done(err);
+        });
         if (req.user) {
             const user = req.user as UserDocument;
             User.findById(user.id, (err, user: any) => {
@@ -66,6 +68,10 @@ passport.use("truelayer", new CustomStrategy(
                 });
             });
         } else {
+            const info: any = await DataAPIClient.getInfo(tokens.access_token).catch((err)=>{
+                logger.error(err);
+                done(err);
+            });
             //Info: I assume that I use only the first incoming mail in the system.
             const uniqueEmail = info.results[0].emails[0];
             User.findOne({ email: uniqueEmail }, (err, existingEmailUser: any) => {
