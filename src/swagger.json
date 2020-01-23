@@ -1,0 +1,381 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Emma Challange API",
+        "description": "Emma Challange - Please make sure you are logged in.",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "host": "localhost:3000",
+    "basePath": "/api",
+    "tags": [
+        {
+            "name": "Accounts",
+            "description": "API for accounts in the system."
+        },
+        {
+            "name": "Transactions",
+            "description": "API for transactions in the system."
+        },
+        {
+            "name": "Users",
+            "description": "API for users in the system."
+        },
+        {
+            "name": "Truelayer",
+            "description": "API for truelayer in the system."
+        }
+    ],
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/api/accounts": {
+            "get": {
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "Get all accounts in system",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Accounts"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "ID of account that we want to find",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "Get account with given ID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Account"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/transactions": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get all transactions in system",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Transactions"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/transactions/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "ID of transaction that we want to find",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get transaction with given ID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Transaction"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userId}/transactions": {
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "path",
+                    "required": true,
+                    "description": "ID of user that we want to find",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get transactions with given UserID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Transactions"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userId}/accounts": {
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "path",
+                    "required": true,
+                    "description": "ID of user that we want to find",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get accounts with given UserID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Accounts"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userId}/transactions/groupByAccount": {
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "path",
+                    "required": true,
+                    "description": "ID of user that we want to find",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get transactions group by account with given UserID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Transactions"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/truelayer": {
+            "get": {
+                "tags": [
+                    "Truelayer"
+                ],
+                "summary": "Get transaction and accounts from Truelayer",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/truelayer/{userId}/test": {
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "path",
+                    "required": true,
+                    "description": "ID of user that we want to find",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "tags": [
+                    "Truelayer"
+                ],
+                "summary": "Get Test result with given UserID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TruelayerTest"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "User": {
+            "required": [
+                "_id"
+            ],
+            "properties": {
+                "_id": {
+                    "type": "string",
+                    "uniqueItems": true
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "hidden": true
+                },
+                "password_reset_token": {
+                    "type": "string"
+                },
+                "password_reset_expires": {
+                    "type": "string"
+                },
+                "tokens": {
+                    "type": "array"
+                },
+                "profile": {
+                    "type": "object"
+                }
+            }
+        },
+        "Account": {
+            "required": [
+                "_id"
+            ],
+            "properties": {
+                "_id": {
+                    "type": "string",
+                    "uniqueItems": true
+                },
+                "account_id": {
+                    "type": "string",
+                    "uniqueItems": true
+                },
+                "account_number": {
+                    "type": "object"
+                },
+                "account_type": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "object"
+                },
+                "update_timestamp": {
+                    "type": "date"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "Transaction": {
+            "required": [
+                "_id"
+            ],
+            "properties": {
+                "_id": {
+                    "type": "string",
+                    "uniqueItems": true
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "meta": {
+                    "type": "object"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "transaction_type": {
+                    "type": "string"
+                },
+                "transaction_category": {
+                    "type": "string"
+                },
+                "account_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "TruelayerTest": {
+            "properties": {
+                "_id": {
+                    "type": "string",
+                    "uniqueItems": true
+                },
+                "access_token_valid": {
+                    "type": "boolean"
+                },
+                "refresh_token_valid": {
+                    "type": "boolean"
+                },
+                "api_calls": {
+                    "type": "array"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "created_date": {
+                    "type": "date"
+                }
+            }
+        },
+        "Accounts": {
+            "type": "array",
+            "$ref": "#/definitions/Account"
+        },
+        "Transactions": {
+            "type": "array",
+            "$ref": "#/definitions/Transaction"
+        }
+    }
+}

@@ -23,17 +23,6 @@ const client = new AuthAPIClient({
 const scopes = ["info", "accounts", "balance", "cards", "transactions", "direct_debits", "standing_orders", "offline_access"];
 
 /**
- * GET /api
- * List of API examples.
- */
-export const getApi = (req: Request, res: Response) => {
-    //TODO: You can use Swagger or OpenApi Url
-    res.render("api/index", {
-        title: "API Examples"
-    });
-};
-
-/**
  * GET /api/truelayer
  * TrueLayer API
  */
@@ -192,12 +181,11 @@ export const getTrueLayerServiceTest = async (req: Request, res: Response, next:
     }
 
     //API Calls
-
+    // We can add another endpoint.
     const trueLayerEndpoints: string[] = ["/Me", "/Info", "/Accounts"];
 
     for (const trueLayerEndpoint of trueLayerEndpoints) {
         await apiCalls(trueLayerEndpoint, token.access_token).then((res: any) => {
-            console.log(res);
             response.api_calls.push(res);
         });
     }
@@ -208,10 +196,6 @@ export const getAccounts = (req: Request, res: Response, next: NextFunction) => 
     Account.find({})
         .exec((err, accounts: AccountDocument) => {
             if (err) { logger.error(err); return next(err); }
-            if (!accounts) {
-                req.flash("info", { msg: "No account find." });
-                next(err);
-            }
             res.json(accounts);
         });
 };
@@ -219,10 +203,6 @@ export const getAccounts = (req: Request, res: Response, next: NextFunction) => 
 export const getAccount = (req: Request, res: Response, next: NextFunction) => {
     Account.findById(req.params.id, (err, account: AccountDocument) => {
         if (err) { logger.error(err); return next(err); }
-        if (!account) {
-            req.flash("info", { msg: "No account find." });
-            next(err);
-        }
         res.json(account);
     });
 };
@@ -231,10 +211,6 @@ export const getAccountsByUserId = (req: Request, res: Response, next: NextFunct
     Account.find({ user_id: req.params.id })
         .exec((err, accounts: AccountDocument) => {
             if (err) { logger.error(err); return next(err); }
-            if (!accounts) {
-                req.flash("info", { msg: "No account find." });
-                next(err);
-            }
             res.json(accounts);
         });
 };
@@ -243,10 +219,6 @@ export const getTransactions = (req: Request, res: Response, next: NextFunction)
     Transaction.find({})
         .exec((err, transactions: TransactionDocument) => {
             if (err) { logger.error(err); return next(err); }
-            if (!transactions) {
-                req.flash("info", { msg: "No transaction find." });
-                next(err);
-            }
             res.json(transactions);
         });
 };
@@ -254,10 +226,6 @@ export const getTransactions = (req: Request, res: Response, next: NextFunction)
 export const getTransaction = (req: Request, res: Response, next: NextFunction) => {
     Transaction.findById(req.params.id, (err, transaction: TransactionDocument) => {
         if (err) { logger.error(err); return next(err); }
-        if (!transaction) {
-            req.flash("info", { msg: "No transaction find." });
-            next(err);
-        }
         res.json(transaction);
     });
 };
@@ -266,10 +234,6 @@ export const getTransactionsByUserId = (req: Request, res: Response, next: NextF
     Transaction.find({ user_id: req.params.id })
         .exec((err, transactions: TransactionDocument) => {
             if (err) { logger.error(err); return next(err); }
-            if (!transactions) {
-                req.flash("info", { msg: "No transaction find." });
-                next(err);
-            }
             res.json(transactions);
         });
 };
