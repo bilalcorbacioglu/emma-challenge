@@ -12,6 +12,8 @@ import bluebird from "bluebird";
 import { MONGODB_URI, SESSION_SECRET } from "./util/secrets";
 import logger from "./util/logger";
 
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger.json";
 const MongoStore = mongo(session);
 
 // Controllers (route handlers)
@@ -103,8 +105,6 @@ app.get("/user/unlink/:provider", passportConfig.isAuthenticated, userController
 /**
  * API routes.
  */
-app.get("/api", apiController.getApi);
-
 app.get("/api/accounts", passportConfig.isAuthenticated, apiController.getAccounts);
 app.get("/api/accounts/:id", passportConfig.isAuthenticated, apiController.getAccount);
 
@@ -130,5 +130,11 @@ app.get("/auth/truelayer", apiController.getTrueLayerRedirect);
 app.get("/auth/truelayer/callback", passport.authenticate("truelayer", { failureRedirect: "/login" }), (req, res) => {
     res.redirect("/api/truelayer");
 });
+
+/**
+ * Swagger
+ */
+
+app.use("/explorer", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 export default app;
