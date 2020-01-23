@@ -13,13 +13,12 @@ export const SESSION_SECRET = process.env["SESSION_SECRET"];
 export const MONGODB_URI = prod ? process.env["MONGODB_URI"] : process.env["MONGODB_URI_LOCAL"];
 export const TRUELAYER_CLIENT_ID = process.env["TRUELAYER_CLIENT_ID"];
 export const TRUELAYER_CLIENT_SECRET = process.env["TRUELAYER_CLIENT_SECRET"];
-export const TRUELAYER_SCOPES = process.env["TRUELAYER_SCOPES"];
 export const TRUELAYER_REDIRECT_URL = process.env["TRUELAYER_REDIRECT_URL"];
 export const BCRYPT_ROUND = process.env["BCRYPT_ROUND"];
 export const TRUELAYER_ACCESSTOKEN_EXPIRES_TIME = process.env["TRUELAYER_ACCESSTOKEN_EXPIRES_TIME"];
 
 
-if (!TRUELAYER_CLIENT_ID || !TRUELAYER_CLIENT_SECRET || !TRUELAYER_SCOPES || !TRUELAYER_REDIRECT_URL) {
+if (!TRUELAYER_CLIENT_ID || !TRUELAYER_CLIENT_SECRET || !TRUELAYER_REDIRECT_URL) {
     logger.error("No TrueLayer information. Set TRUELAYER_*** environment variables.");
     process.exit(1);
 }
